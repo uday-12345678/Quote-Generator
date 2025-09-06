@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📝 Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-96">
+    <h1 class="text-3xl font-bold text-center mb-6 text-purple-600">📝 Create Account</h1>
+    
+    <form action="/do_signup" method="post" onsubmit="return validateForm()">
+      <!-- Phone -->
+      <label class="block text-gray-700 mb-2">📱 Phone Number</label>
+      <input type="tel" name="phone" required 
+             placeholder="Enter phone number"
+             class="w-full p-3 rounded-lg border mb-4" />
+
+      <!-- Password -->
+      <label class="block text-gray-700 mb-2">🔒 Password</label>
+      <input type="password" id="password" name="password" required minlength="8"
+             placeholder="Create strong password"
+             class="w-full p-3 rounded-lg border mb-2" 
+             oninput="checkStrength()" />
+
+      <!-- Strength Bar -->
+      <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+        <div id="strengthBar" class="h-2 rounded-full bg-red-500 w-0"></div>
+      </div>
+      <p id="strengthText" class="text-sm font-semibold text-gray-600 mb-4">Password strength: Weak</p>
+
+      <!-- Button -->
+      <button type="submit" id="submitBtn"
+              class="w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold rounded-lg hover:scale-105 transition">
+        🚀 Sign Up
+      </button>
+    </form>
+
+    <p class="text-center mt-4 text-sm text-gray-600">
+      Already have an account? <a href="/" class="text-blue-600 font-semibold">Login</a>
+    </p>
+  </div>
+
+  <script>
+    function checkStrength() {
+      const password = document.getElementById("password").value;
+      const strengthBar = document.getElementById("strengthBar");
+      const strengthText = document.getElementById("strengthText");
+
+      let strength = 0;
+
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+      switch (strength) {
+        case 0:
+        case 1:
+          strengthBar.style.width = "25%";
+          strengthBar.style.background = "red";
+          strengthText.textContent = "Password strength: Weak ❌";
+          strengthText.style.color = "red";
+          break;
+        case 2:
+          strengthBar.style.width = "50%";
+          strengthBar.style.background = "orange";
+          strengthText.textContent = "Password strength: Medium ⚠️";
+          strengthText.style.color = "orange";
+          break;
+        case 3:
+          strengthBar.style.width = "75%";
+          strengthBar.style.background = "blue";
+          strengthText.textContent = "Password strength: Good ✅";
+          strengthText.style.color = "blue";
+          break;
+        case 4:
+          strengthBar.style.width = "100%";
+          strengthBar.style.background = "green";
+          strengthText.textContent = "Password strength: Strong 🔥";
+          strengthText.style.color = "green";
+          break;
+      }
+    }
+
+    function validateForm() {
+      const password = document.getElementById("password").value;
+      if (password.length < 8) {
+        alert("Password must be at least 8 characters long!");
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>
