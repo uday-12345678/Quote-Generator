@@ -34,7 +34,7 @@
 
   <div class="w-full max-w-2xl">
     <header class="text-center mb-8">
-      <h1 class="text-5xl font-extraboldx">✨ Quote Generator</h1>
+      <h1 class="text-5xl font-extrabold">✨ Quote Generator</h1>
       <p class="text-sm text-purple-200/80">Pick a genre and get an inspiring quote.</p>
     </header>
 
@@ -72,15 +72,24 @@
           <p id="quoteAuthor" class="text-sm text-purple-300 font-semibold"></p>
           <div id="tagContainer" class="text-xs text-purple-200/80"></div>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="copyBtn" onclick="copyQuote()" title="Copy quote" class="px-3 py-1 rounded-md bg-neutral-900/40 text-sm text-[--muted] hover:bg-neutral-900/60 btn-focus">Copy</button>
-          <button id="tweetBtn" onclick="shareTweet()" title="Share on Twitter" class="px-3 py-1 rounded-md bg-[#0ea5a4] text-sm text-slate-900 font-medium hover:brightness-105 btn-focus">Tweet</button>
+        <div class="flex items-center gap-2 flex-wrap mt-3">
+          <!-- Copy -->
+          <button id="copyBtn" onclick="copyQuote()" class="px-3 py-1 rounded-md bg-neutral-900/40 text-sm hover:bg-neutral-900/60">📋 Copy</button>
+          <!-- Twitter -->
+          <button id="tweetBtn" onclick="shareTweet()" class="px-3 py-1 rounded-md bg-[#0ea5a4] text-sm text-slate-900 font-medium hover:brightness-105">🐦 Tweet</button>
+          <!-- WhatsApp -->
+          <button id="whatsappBtn" onclick="shareWhatsApp()" class="px-3 py-1 rounded-md bg-green-500 text-sm text-white hover:brightness-110">📲 WhatsApp</button>
+          <!-- Download Image -->
+          <button id="downloadBtn" onclick="downloadImage()" class="px-3 py-1 rounded-md bg-purple-600 text-sm text-white hover:brightness-110">🖼 Save</button>
         </div>
       </div>
 
       <p id="statusMessage" class="mt-4 text-sm text-yellow-300 hidden"></p>
     </div>
   </div>
+
+  <!-- html2canvas for screenshot -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     async function generateQuote() {
@@ -97,10 +106,10 @@
 
         document.getElementById("loadingSpinner").classList.add("hidden");
 
-        if (data && data.success && data.quote) {
+        if (data && data.quote) {
           document.getElementById("quoteText").innerText = `“${data.quote}”`;
           document.getElementById("quoteAuthor").innerText = data.author ? `— ${data.author}` : "";
-          // show tags if present
+          // show tags
           const tagContainer = document.getElementById("tagContainer");
           tagContainer.innerHTML = "";
           if (Array.isArray(data.tags) && data.tags.length) {
@@ -108,8 +117,7 @@
           }
           document.getElementById("quoteBox").classList.remove("hidden");
         } else {
-          // show user friendly message
-          const msg = (data && data.message) ? data.message : "No quote found for this genre.";
+          const msg = data.message || "No quote found for this genre.";
           const status = document.getElementById("statusMessage");
           status.innerText = `⚠️ ${msg}`;
           status.classList.remove("hidden");
@@ -123,47 +131,40 @@
     }
 
     function copyQuote(){
-      const qEl = document.getElementById('quoteText');
-      const aEl = document.getElementById('quoteAuthor');
-      const q = qEl ? qEl.textContent.trim() : '';
-      const a = aEl ? aEl.textContent.trim() : '';
-
-      if (!q) {
-        showStatus('Nothing to copy.');
-        return;
-      }
-
+      const q = document.getElementById('quoteText').textContent.trim();
+      const a = document.getElementById('quoteAuthor').textContent.trim();
       const text = a ? `${q}\n${a}` : q;
 
-      (async () => {
-        try {
-          // Preferred API (works on secure contexts / localhost)
-          if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(text);
-          } else {
-            // Fallback for non-secure contexts
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.setAttribute('readonly', '');
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            ta.setSelectionRange(0, ta.value.length);
-            document.execCommand('copy');
-            ta.remove();
-          }
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const prev = btn.innerHTML;
+        btn.innerText = '✅ Copied';
+        setTimeout(() => { btn.innerHTML = prev; }, 1200);
+      });
+    }
 
-          const btn = document.getElementById('copyBtn');
-          if (btn) {
-            const prev = btn.innerHTML;
-            btn.innerText = 'Copied';
-            setTimeout(() => { btn.innerHTML = prev; }, 1200);
-          }
-        } catch (err) {
-          showStatus('Error copying quote.');
-        }
-      })();
+    function shareTweet(){
+      const q = document.getElementById('quoteText').innerText;
+      const a = document.getElementById('quoteAuthor').innerText;
+      const text = encodeURIComponent(`${q} ${a}`);
+      window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+    }
+
+    function shareWhatsApp(){
+      const q = document.getElementById('quoteText').innerText;
+      const a = document.getElementById('quoteAuthor').innerText;
+      const text = encodeURIComponent(`${q} ${a}`);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
+
+    function downloadImage(){
+      const element = document.getElementById("quoteBox");
+      html2canvas(element, { backgroundColor: "#0f172a" }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "quote.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
     }
   </script>
 </body>
