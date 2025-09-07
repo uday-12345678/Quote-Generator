@@ -34,6 +34,59 @@ def get_quote():
     genre = request.args.get("genre", "inspirational") or "inspirational"
     genre = genre.strip().lower()
 
+    # If user requested fun/humor, fetch from a jokes API
+    if genre in ("humor", "fun"):
+        joke_url = "https://official-joke-api.appspot.com/jokes/random"
+        try:
+            res = session.get(joke_url, timeout=6)
+            if res.status_code != 200:
+                try:
+                    err_msg = res.json().get("message", res.text)
+                except Exception:
+                    err_msg = res.text
+                logging.warning("Joke API error: %s (status %s)", err_msg, res.status_code)
+                return jsonify({
+                    "success": False,
+                    "quote": None,
+                    "author": None,
+                    "tags": ["humor"],
+                    "message": f"Joke API error: {err_msg}"
+                })
+
+            data = res.json()
+            # official-joke-api returns 'setup' and 'punchline'
+            setup = data.get("setup", "").strip()
+            punchline = data.get("punchline", "").strip()
+            joke_text = (setup + (" " if setup and punchline else "") + punchline).strip()
+
+            if not joke_text:
+                logging.warning("Joke API returned empty data: %s", data)
+                return jsonify({
+                    "success": False,
+                    "quote": None,
+                    "author": None,
+                    "tags": ["humor"],
+                    "message": "Joke API returned no joke."
+                })
+
+            return jsonify({
+                "success": True,
+                "quote": joke_text,
+                "author": data.get("type", "Joke"),
+                "tags": ["humor"],
+                "message": "OK"
+            })
+
+        except requests.exceptions.RequestException as e:
+            logging.exception("Network error while fetching joke")
+            return jsonify({
+                "success": False,
+                "quote": None,
+                "author": None,
+                "tags": ["humor"],
+                "message": f"Network error: {str(e)}"
+            })
+
     url = "https://api.quotable.io/random"
     params = {"tags": genre}
     try:
