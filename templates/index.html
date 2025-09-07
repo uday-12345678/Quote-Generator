@@ -48,6 +48,7 @@
             <option value="happiness">Happiness</option>
             <option value="life">Life</option>
             <option value="love">Love</option>
+            <option value="humor">Fun</option>
             <option value="friendship">Friendship</option>
             <option value="success">Success</option>
             <option value="technology">Technology</option>
@@ -67,19 +68,22 @@
       </div>
 
       <div id="quoteBox" class="mt-6 hidden bg-[#041025] bg-opacity-60 p-6 rounded-2xl border border-purple-700/30">
-        <p id="quoteText" class="text-xl lg:text-2xl italic text-purple-100 mb-4"></p>
-        <div class="flex items-center justify-between">
-          <p id="quoteAuthor" class="text-sm text-purple-300 font-semibold"></p>
-          <div id="tagContainer" class="text-xs text-purple-200/80"></div>
+        
+        <!-- ✅ Only this section will be saved as image -->
+        <div id="quoteContent" 
+             class="inline-block text-center bg-gradient-to-br from-[#0f172a] to-[#1a103f] p-6 rounded-2xl shadow-lg max-w-xl"
+             style="min-width: 320px;">
+          <p id="quoteText" 
+             class="text-xl lg:text-2xl italic text-purple-100 mb-4 leading-relaxed"></p>
+          <p id="quoteAuthor" 
+             class="text-lg font-semibold text-purple-300 mt-2"></p>
         </div>
+
+        <!-- Buttons (not included in image) -->
         <div class="flex items-center gap-2 flex-wrap mt-3">
-          <!-- Copy -->
           <button id="copyBtn" onclick="copyQuote()" class="px-3 py-1 rounded-md bg-neutral-900/40 text-sm hover:bg-neutral-900/60">📋 Copy</button>
-          <!-- Twitter -->
           <button id="tweetBtn" onclick="shareTweet()" class="px-3 py-1 rounded-md bg-[#0ea5a4] text-sm text-slate-900 font-medium hover:brightness-105">🐦 Tweet</button>
-          <!-- WhatsApp -->
           <button id="whatsappBtn" onclick="shareWhatsApp()" class="px-3 py-1 rounded-md bg-green-500 text-sm text-white hover:brightness-110">📲 WhatsApp</button>
-          <!-- Download Image -->
           <button id="downloadBtn" onclick="downloadImage()" class="px-3 py-1 rounded-md bg-purple-600 text-sm text-white hover:brightness-110">🖼 Save</button>
         </div>
       </div>
@@ -109,12 +113,6 @@
         if (data && data.quote) {
           document.getElementById("quoteText").innerText = `“${data.quote}”`;
           document.getElementById("quoteAuthor").innerText = data.author ? `— ${data.author}` : "";
-          // show tags
-          const tagContainer = document.getElementById("tagContainer");
-          tagContainer.innerHTML = "";
-          if (Array.isArray(data.tags) && data.tags.length) {
-            tagContainer.innerHTML = data.tags.map(t => `<span class="px-2 py-1 rounded bg-purple-800/40">${t}</span>`).join(" ");
-          }
           document.getElementById("quoteBox").classList.remove("hidden");
         } else {
           const msg = data.message || "No quote found for this genre.";
@@ -158,8 +156,12 @@
     }
 
     function downloadImage(){
-      const element = document.getElementById("quoteBox");
-      html2canvas(element, { backgroundColor: "#0f172a" }).then(canvas => {
+      const element = document.getElementById("quoteContent"); 
+      html2canvas(element, { 
+        backgroundColor: "#0f172a", 
+        scale: 2,  // higher resolution
+        useCORS: true 
+      }).then(canvas => {
         const link = document.createElement("a");
         link.download = "quote.png";
         link.href = canvas.toDataURL("image/png");
