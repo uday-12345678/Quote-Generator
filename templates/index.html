@@ -43,6 +43,7 @@
         <div class="flex-1 w-full">
           <label for="genre" class="block mb-2 text-sm font-semibold text-purple-300">Choose a genre</label>
           <select id="genre" class="w-full p-3 rounded-lg bg-[#0b1220] border border-purple-700 text-white focus:outline-none">
+            <option value="" disabled selected>Choose a genre</option>
             <option value="inspirational">Inspirational</option>
             <option value="wisdom">Wisdom</option>
             <option value="happiness">Happiness</option>
@@ -68,8 +69,6 @@
       </div>
 
       <div id="quoteBox" class="mt-6 hidden bg-[#041025] bg-opacity-60 p-6 rounded-2xl border border-purple-700/30">
-        
-        <!-- ✅ Only this section will be saved as image -->
         <div id="quoteContent" 
              class="inline-block text-center bg-gradient-to-br from-[#0f172a] to-[#1a103f] p-6 rounded-2xl shadow-lg max-w-xl"
              style="min-width: 320px;">
@@ -79,7 +78,6 @@
              class="text-lg font-semibold text-purple-300 mt-2"></p>
         </div>
 
-        <!-- Buttons (not included in image) -->
         <div class="flex items-center gap-2 flex-wrap mt-3">
           <button id="copyBtn" onclick="copyQuote()" class="px-3 py-1 rounded-md bg-neutral-900/40 text-sm hover:bg-neutral-900/60">📋 Copy</button>
           <button id="tweetBtn" onclick="shareTweet()" class="px-3 py-1 rounded-md bg-[#0ea5a4] text-sm text-slate-900 font-medium hover:brightness-105">🐦 Tweet</button>
@@ -92,13 +90,20 @@
     </div>
   </div>
 
-  <!-- html2canvas for screenshot -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     async function generateQuote() {
       const genreEl = document.getElementById("genre");
-      const genre = genreEl.value || "inspirational";
+      const genre = genreEl.value;
+
+      if (!genre) {
+        const status = document.getElementById("statusMessage");
+        status.innerText = "⚠️ Please select a genre first.";
+        status.classList.remove("hidden");
+        document.getElementById("quoteBox").classList.add("hidden");
+        return;
+      }
 
       document.getElementById("quoteBox").classList.add("hidden");
       document.getElementById("statusMessage").classList.add("hidden");
@@ -159,7 +164,7 @@
       const element = document.getElementById("quoteContent"); 
       html2canvas(element, { 
         backgroundColor: "#0f172a", 
-        scale: 2,  // higher resolution
+        scale: 2,
         useCORS: true 
       }).then(canvas => {
         const link = document.createElement("a");
